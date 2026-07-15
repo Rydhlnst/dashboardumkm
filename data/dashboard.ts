@@ -108,16 +108,16 @@ const AREA_CFG: Record<string, {
 
 // Build regions from real data, merging static config for non-derivable fields
 export function buildRegions(stats: AreaStat[]): Region[] {
-  return stats
-    .map((stat) => {
+  const result: Region[] = [];
+  for (const stat of stats) {
     const cfg = AREA_CFG[stat.area];
-    if (!cfg) return null;
+    if (!cfg) continue;
     const umkmPct = stat.umkmCoverage;
     const expansionStatus =
       umkmPct >= 70 ? ("open" as const)
       : umkmPct >= 30 ? ("conditional" as const)
       : ("closed" as const);
-    return {
+    result.push({
       id: cfg.id,
       name: cfg.name,
       shortName: cfg.shortName,
@@ -134,9 +134,9 @@ export function buildRegions(stats: AreaStat[]): Region[] {
       mdProgress: cfg.mdProgress,
       activeItems: cfg.activeItems,
       newStores: cfg.newStores,
-    };
-  })
-    .filter((r): r is Region => r !== null);
+    });
+  }
+  return result;
 }
 
 export const regions: Region[] = buildRegions(areaStats);
