@@ -5,70 +5,30 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Map,
-  TrendingUp,
+  BarChart3,
   Store,
   Handshake,
   ShoppingBag,
   Megaphone,
-  FileBarChart2,
+  FileText,
   Settings,
-  ChevronRight,
+  ArrowUpRight,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 const navItems = [
-  {
-    label: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Overview",
-    href: "/overview",
-    icon: TrendingUp,
-  },
-  {
-    label: "Wilayah",
-    href: "/wilayah",
-    icon: Map,
-    badge: "12",
-  },
-  {
-    label: "Expansion",
-    href: "/expansion",
-    icon: ChevronRight,
-  },
-  {
-    label: "UMKM",
-    href: "/umkm",
-    icon: Store,
-  },
-  {
-    label: "PKS / MoU",
-    href: "/pks",
-    icon: Handshake,
-  },
-  {
-    label: "Store",
-    href: "/store",
-    icon: ShoppingBag,
-  },
-  {
-    label: "Promotion",
-    href: "/promotion",
-    icon: Megaphone,
-  },
-  {
-    label: "Reports",
-    href: "/reports",
-    icon: FileBarChart2,
-  },
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
+  { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Overview", href: "/overview", icon: BarChart3 },
+  { label: "Wilayah", href: "/wilayah", icon: Map, badge: "12" },
+  { label: "Ekspansi", href: "/expansion", icon: ArrowUpRight },
+  { label: "UMKM", href: "/umkm", icon: Users },
+  { label: "PKS / MoU", href: "/pks", icon: Handshake },
+  { label: "Toko", href: "/store", icon: ShoppingBag },
+  { label: "Promosi", href: "/promotion", icon: Megaphone },
+  { label: "Laporan", href: "/reports", icon: FileText },
+  { label: "Pengaturan", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
