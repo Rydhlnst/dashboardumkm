@@ -36,10 +36,7 @@ export function Sidebar() {
 
   return (
     <aside className="hidden lg:flex flex-col w-60 min-h-screen bg-sidebar border-r border-sidebar-border fixed left-0 top-0 z-40">
-      <div className="flex items-center gap-2.5 px-5 h-16 border-b border-sidebar-border">
-        <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center flex-shrink-0">
-          <span className="text-white text-xs font-bold">A</span>
-        </div>
+      <div className="flex items-center px-5 h-16 border-b border-sidebar-border">
         <div className="flex flex-col leading-tight">
           <span className="text-sm font-semibold text-sidebar-foreground">Alfamidi</span>
           <span className="text-xs text-muted-foreground">Branch Palu</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Store } from "@/db/schema";
 import type { AreaStat } from "@/data/area-stats";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,11 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { Search } from "lucide-react";
+import { useDebounce } from "@/hooks/use-debounce";
+
+const PAGE_SIZE = 25;
 
 interface Props {
   stores: Store[];
@@ -23,9 +27,12 @@ export function PromotionClient({ stores, areaStats }: Props) {
     [stores]
   );
 
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [areaFilter, setAreaFilter] = useState("Semua");
   const [statusFilter, setStatusFilter] = useState<"Semua" | "Terpasang" | "Belum">("Semua");
+  const [page, setPage] = useState(1);
+
+  const search = useDebounce(searchInput, 500);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -36,6 +43,11 @@ export function PromotionClient({ stores, areaStats }: Props) {
       return true;
     });
   }, [stores, search, areaFilter, statusFilter]);
+
+  useEffect(() => { setPage(1); }, [search, areaFilter, statusFilter]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const totalTerpasang = stores.filter((s) => s.saranaPromosi === "Terpasang").length;
   const totalBelum = stores.filter((s) => s.saranaPromosi === "Belum").length;
@@ -95,8 +107,8 @@ export function PromotionClient({ stores, areaStats }: Props) {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
             placeholder="Cari nama atau kode toko..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-8 h-8 text-xs"
           />
         </div>
@@ -133,7 +145,7 @@ export function PromotionClient({ stores, areaStats }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((s) => (
+            {paginated.map((s) => (
               <TableRow key={s.kode} className="hover:bg-muted/40 border-b border-border/30">
                 <TableCell className="font-mono text-[11px] text-muted-foreground">{s.kode}</TableCell>
                 <TableCell className="text-xs font-medium">{s.nama}</TableCell>
@@ -168,10 +180,18 @@ export function PromotionClient({ stores, areaStats }: Props) {
             ))}
           </TableBody>
         </Table>
-        {filtered.length === 0 && (
+        {filtered.length === 0 ? (
           <div className="text-center py-12 text-sm text-muted-foreground">
             Tidak ada data yang sesuai filter.
           </div>
+        ) : (
+          <TablePagination
+            page={page}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         )}
       </Card>
     </div>

@@ -1,6 +1,7 @@
 import { db } from "./index";
 import { stores, umkmProducts } from "./schema";
-import { eq, sql, count } from "drizzle-orm";
+import { eq, sql, count, max } from "drizzle-orm";
+import type { StoreInput, UMKMProductInput } from "@/lib/validations";
 
 export async function getStores() {
   return db.select().from(stores).orderBy(stores.no);
@@ -61,4 +62,46 @@ export async function getKPISummary() {
 
 export async function getStoresByArea(area: string) {
   return db.select().from(stores).where(eq(stores.area, area)).orderBy(stores.no);
+}
+
+export async function getStoreById(id: number) {
+  const [row] = await db.select().from(stores).where(eq(stores.id, id));
+  return row ?? null;
+}
+
+export async function createStore(data: StoreInput) {
+  const [{ maxNo }] = await db.select({ maxNo: max(stores.no) }).from(stores);
+  const no = (maxNo ?? 0) + 1;
+  const [row] = await db.insert(stores).values({ no, ...data }).returning();
+  return row;
+}
+
+export async function updateStore(id: number, data: StoreInput) {
+  const [row] = await db.update(stores).set(data).where(eq(stores.id, id)).returning();
+  return row;
+}
+
+export async function deleteStore(id: number) {
+  await db.delete(stores).where(eq(stores.id, id));
+}
+
+export async function getUMKMProductById(id: number) {
+  const [row] = await db.select().from(umkmProducts).where(eq(umkmProducts.id, id));
+  return row ?? null;
+}
+
+export async function createUMKMProduct(data: UMKMProductInput) {
+  const [{ maxNo }] = await db.select({ maxNo: max(umkmProducts.no) }).from(umkmProducts);
+  const no = (maxNo ?? 0) + 1;
+  const [row] = await db.insert(umkmProducts).values({ no, ...data }).returning();
+  return row;
+}
+
+export async function updateUMKMProduct(id: number, data: UMKMProductInput) {
+  const [row] = await db.update(umkmProducts).set(data).where(eq(umkmProducts.id, id)).returning();
+  return row;
+}
+
+export async function deleteUMKMProduct(id: number) {
+  await db.delete(umkmProducts).where(eq(umkmProducts.id, id));
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Store } from "@/db/schema";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,9 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { Search } from "lucide-react";
+import { useDebounce } from "@/hooks/use-debounce";
 
 type ACEntry = {
   namaAC: string;
@@ -17,6 +19,8 @@ type ACEntry = {
   umkmAktif: number;
   promosiTerpasang: number;
 };
+
+const PAGE_SIZE = 25;
 
 interface Props {
   stores: Store[];
@@ -40,9 +44,12 @@ export function PKSClient({ stores }: Props) {
   const AMS = useMemo(() => ["Semua", ...Array.from(new Set(stores.map((s) => s.namaAM))).sort()], [stores]);
   const ACS = useMemo(() => ["Semua", ...Array.from(new Set(stores.map((s) => s.namaAC))).sort()], [stores]);
 
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [acFilter, setAcFilter] = useState("Semua");
   const [tab, setTab] = useState<"ac" | "stores">("ac");
+  const [page, setPage] = useState(1);
+
+  const search = useDebounce(searchInput, 500);
 
   const filteredStores = useMemo(() => {
     const q = search.toLowerCase();
@@ -60,6 +67,13 @@ export function PKSClient({ stores }: Props) {
       return true;
     });
   }, [acList, search]);
+
+  useEffect(() => { setPage(1); }, [search, acFilter, tab]);
+
+  const activeFiltered = tab === "ac" ? filteredAC : filteredStores;
+  const totalPages = Math.ceil(activeFiltered.length / PAGE_SIZE);
+  const paginatedAC = filteredAC.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginatedStores = filteredStores.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-5">
@@ -112,8 +126,8 @@ export function PKSClient({ stores }: Props) {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
             placeholder={tab === "ac" ? "Cari AC atau AM..." : "Cari nama toko..."}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             className="pl-8 h-8 text-xs"
           />
         </div>
@@ -142,7 +156,7 @@ export function PKSClient({ stores }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAC.map((a) => {
+              {paginatedAC.map((a) => {
                 const pct = Math.round((a.umkmAktif / a.totalStores) * 100);
                 return (
                   <TableRow key={a.namaAC} className="hover:bg-muted/40 border-b border-border/30">
@@ -169,6 +183,19 @@ export function PKSClient({ stores }: Props) {
               })}
             </TableBody>
           </Table>
+          {filteredAC.length === 0 ? (
+            <div className="text-center py-12 text-sm text-muted-foreground">
+              Tidak ada data yang sesuai filter.
+            </div>
+          ) : (
+            <TablePagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={filteredAC.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
+          )}
         </Card>
       )}
 
@@ -186,7 +213,7 @@ export function PKSClient({ stores }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStores.map((s) => (
+              {paginatedStores.map((s) => (
                 <TableRow key={s.kode} className="hover:bg-muted/40 border-b border-border/30">
                   <TableCell className="font-mono text-[11px] text-muted-foreground">{s.kode}</TableCell>
                   <TableCell className="text-xs font-medium">{s.nama}</TableCell>
@@ -209,10 +236,18 @@ export function PKSClient({ stores }: Props) {
               ))}
             </TableBody>
           </Table>
-          {filteredStores.length === 0 && (
+          {filteredStores.length === 0 ? (
             <div className="text-center py-12 text-sm text-muted-foreground">
               Tidak ada data yang sesuai filter.
             </div>
+          ) : (
+            <TablePagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={filteredStores.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
           )}
         </Card>
       )}
