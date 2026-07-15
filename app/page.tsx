@@ -14,7 +14,6 @@ import { InsightCards } from "@/components/dashboard/insight-cards";
 import { MonthlyTrendChart } from "@/components/dashboard/monthly-trend-chart";
 import {
   regions,
-  kpiData,
   storeDistribution,
   expansionChartData,
   umkmChartData,

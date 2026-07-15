@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Download, SlidersHorizontal, Search, Menu } from "lucide-react";
+import { Bell, SlidersHorizontal, Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./sidebar";
+import { ExportButton } from "./export-button";
 
 interface TopbarProps {
   title?: string;
@@ -60,10 +61,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
           <SlidersHorizontal className="w-3 h-3" />
           Filter
         </Button>
-        <Button size="sm" className="h-8 gap-1.5 text-xs bg-red-600 hover:bg-red-700 text-white">
-          <Download className="w-3 h-3" />
-          Export
-        </Button>
+        <ExportButton />
       </div>
     </header>
   );
