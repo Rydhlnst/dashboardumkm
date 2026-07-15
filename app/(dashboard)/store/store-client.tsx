@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { stores, type UMKMStatus, type PromotionStatus } from "@/data/stores";
+import type { Store } from "@/db/schema";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,9 +10,19 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
-const AREAS = ["Semua", ...Array.from(new Set(stores.map((s) => s.area))).sort()];
+type UMKMStatus = "Aktif" | "Belum";
+type PromotionStatus = "Terpasang" | "Belum";
 
-export default function StorePage() {
+interface Props {
+  stores: Store[];
+}
+
+export function StoreClient({ stores }: Props) {
+  const AREAS = useMemo(
+    () => ["Semua", ...Array.from(new Set(stores.map((s) => s.area))).sort()],
+    [stores]
+  );
+
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("Semua");
   const [umkmFilter, setUmkmFilter] = useState<"Semua" | UMKMStatus>("Semua");
@@ -27,7 +37,7 @@ export default function StorePage() {
       if (q && !s.nama.toLowerCase().includes(q) && !s.kode.toLowerCase().includes(q) && !s.alamat.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [search, areaFilter, umkmFilter, promoFilter]);
+  }, [stores, search, areaFilter, umkmFilter, promoFilter]);
 
   return (
     <div className="space-y-5">
@@ -38,7 +48,6 @@ export default function StorePage() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total Toko", value: stores.length },
@@ -55,7 +64,6 @@ export default function StorePage() {
         ))}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -94,7 +102,6 @@ export default function StorePage() {
         <span className="text-xs text-muted-foreground">{filtered.length} hasil</span>
       </div>
 
-      {/* Table */}
       <Card className="border-border/50">
         <Table>
           <TableHeader>

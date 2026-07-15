@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { stores } from "@/data/stores";
-import { areaStats } from "@/data/area-stats";
+import type { Store } from "@/db/schema";
+import type { AreaStat } from "@/data/area-stats";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -12,9 +12,17 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
-const AREAS = ["Semua", ...Array.from(new Set(stores.map((s) => s.area))).sort()];
+interface Props {
+  stores: Store[];
+  areaStats: AreaStat[];
+}
 
-export default function PromotionPage() {
+export function PromotionClient({ stores, areaStats }: Props) {
+  const AREAS = useMemo(
+    () => ["Semua", ...Array.from(new Set(stores.map((s) => s.area))).sort()],
+    [stores]
+  );
+
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("Semua");
   const [statusFilter, setStatusFilter] = useState<"Semua" | "Terpasang" | "Belum">("Semua");
@@ -27,7 +35,7 @@ export default function PromotionPage() {
       if (q && !s.nama.toLowerCase().includes(q) && !s.kode.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [search, areaFilter, statusFilter]);
+  }, [stores, search, areaFilter, statusFilter]);
 
   const totalTerpasang = stores.filter((s) => s.saranaPromosi === "Terpasang").length;
   const totalBelum = stores.filter((s) => s.saranaPromosi === "Belum").length;
@@ -42,7 +50,6 @@ export default function PromotionPage() {
         </p>
       </div>
 
-      {/* KPI */}
       <div className="grid grid-cols-3 gap-3">
         <Card className="border-border/50">
           <CardContent className="pt-4 pb-3">
@@ -64,7 +71,6 @@ export default function PromotionPage() {
         </Card>
       </div>
 
-      {/* Per area breakdown */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
           <p className="text-sm font-semibold">Progress per Wilayah</p>
@@ -84,7 +90,6 @@ export default function PromotionPage() {
         </CardContent>
       </Card>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -114,7 +119,6 @@ export default function PromotionPage() {
         <span className="text-xs text-muted-foreground">{filtered.length} toko</span>
       </div>
 
-      {/* Table */}
       <Card className="border-border/50">
         <Table>
           <TableHeader>

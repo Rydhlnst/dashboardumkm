@@ -1,11 +1,16 @@
-import { stores } from "@/data/stores";
-import { umkmProducts } from "@/data/umkm";
-import { areaStats, kpiSummary } from "@/data/area-stats";
+import { getStores, getUMKMProducts, getAreaStats, getKPISummary } from "@/db/queries";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const [stores, umkmProducts, areaStats, kpiSummary] = await Promise.all([
+    getStores(),
+    getUMKMProducts(),
+    getAreaStats(),
+    getKPISummary(),
+  ]);
+
   const umkmCoverage = Math.round((kpiSummary.umkmAktif / kpiSummary.totalStores) * 100);
   const promosiCoverage = Math.round((kpiSummary.saranaPromosiTerpasang / kpiSummary.totalStores) * 100);
   const topArea = areaStats[0];
@@ -29,7 +34,6 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      {/* Executive Summary */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
           <p className="text-sm font-semibold">Ringkasan Eksekutif</p>
@@ -63,7 +67,6 @@ export default function ReportsPage() {
         </CardContent>
       </Card>
 
-      {/* Area table */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
           <p className="text-sm font-semibold">Rekap per Wilayah</p>
@@ -119,7 +122,6 @@ export default function ReportsPage() {
         </CardContent>
       </Card>
 
-      {/* UMKM suppliers */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
           <p className="text-sm font-semibold">Rekap Supplier UMKM per Wilayah</p>

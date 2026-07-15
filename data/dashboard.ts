@@ -6,7 +6,17 @@ import type {
   TimelineEntry,
   SocializationRow,
 } from "@/types";
+import type { AreaStat } from "./area-stats";
 import { areaStats, kpiSummary } from "./area-stats";
+
+type KPISummary = {
+  totalAreas: number;
+  totalStores: number;
+  umkmAktif: number;
+  saranaPromosiTerpasang: number;
+  totalProducts: number;
+  suppliersAktif: number;
+};
 
 // Static config for fields not derivable from real data (coordinates, PKS, trend, pipeline)
 const AREA_CFG: Record<string, {
@@ -97,8 +107,9 @@ const AREA_CFG: Record<string, {
 };
 
 // Build regions from real data, merging static config for non-derivable fields
-export const regions: Region[] = areaStats
-  .map((stat) => {
+export function buildRegions(stats: AreaStat[]): Region[] {
+  return stats
+    .map((stat) => {
     const cfg = AREA_CFG[stat.area];
     if (!cfg) return null;
     const umkmPct = stat.umkmCoverage;
@@ -125,7 +136,10 @@ export const regions: Region[] = areaStats
       newStores: cfg.newStores,
     };
   })
-  .filter((r): r is Region => r !== null);
+    .filter((r): r is Region => r !== null);
+}
+
+export const regions: Region[] = buildRegions(areaStats);
 
 export const storeDistribution: StoreDistribution[] = [...regions]
   .sort((a, b) => b.storeCount - a.storeCount)
@@ -261,3 +275,100 @@ export const monthlyTrendData = [
   { month: "Jun", stores: Math.round(kpiSummary.totalStores * 0.98), umkm: Math.round(kpiSummary.umkmAktif * 0.94) },
   { month: "Jul", stores: kpiSummary.totalStores, umkm: kpiSummary.umkmAktif },
 ];
+
+// Builder for dashboard home when DB data is available
+export function buildDashboardData(stats: AreaStat[], kpi: KPISummary) {
+  const builtRegions = buildRegions(stats);
+
+  const builtStoreDistribution: StoreDistribution[] = [...builtRegions]
+    .sort((a, b) => b.storeCount - a.storeCount)
+    .map((r) => ({
+      region: r.name,
+      count: r.storeCount,
+      percentage: Math.round((r.storeCount / kpi.totalStores) * 100),
+    }));
+
+  const builtExpansionChartData: ExpansionChartData[] = [
+    { name: "Open", value: builtRegions.filter((r) => r.expansionStatus === "open").length, color: "#16a34a" },
+    { name: "Conditional", value: builtRegions.filter((r) => r.expansionStatus === "conditional").length, color: "#d97706" },
+    { name: "Closed", value: builtRegions.filter((r) => r.expansionStatus === "closed").length, color: "#dc2626" },
+  ];
+
+  const builtUmkmChartData = builtRegions.map((r) => ({
+    region: r.shortName,
+    active: r.activeUMKM,
+    inactive: r.storeCount - r.activeUMKM,
+  }));
+
+  const byUMKM = [...builtRegions].sort((a, b) => b.activeUMKM - a.activeUMKM);
+  const byStore = [...builtRegions].sort((a, b) => b.storeCount - a.storeCount);
+  const byLowest = [...builtRegions].sort((a, b) => a.mdProgress - b.mdProgress);
+  const byExpansion = [...builtRegions].sort(
+    (a, b) => (a.storeCount - a.activeUMKM) - (b.storeCount - b.activeUMKM)
+  ).reverse();
+
+  const builtInsightCards: InsightCard[] = [
+    {
+      id: "most-active",
+      title: "Most Active Region",
+      value: byUMKM[0]?.name ?? "–",
+      description: `Highest UMKM count — ${byUMKM[0]?.activeUMKM} toko aktif this quarter`,
+      type: "best",
+      region: byUMKM[0]?.id ?? "",
+    },
+    {
+      id: "lowest-dev",
+      title: "Lowest Development",
+      value: byLowest[0]?.name ?? "–",
+      description: `Only ${byLowest[0]?.mdProgress}% MD progress — needs immediate attention`,
+      type: "worst",
+      region: byLowest[0]?.id ?? "",
+    },
+    {
+      id: "highest-store",
+      title: "Highest Store Count",
+      value: byStore[0]?.name ?? "–",
+      description: `${byStore[0]?.storeCount} stores with ${Math.round((byStore[0]?.promotionInstalled / byStore[0]?.storeCount) * 100)}% promotion coverage`,
+      type: "highest",
+      region: byStore[0]?.id ?? "",
+    },
+    {
+      id: "priority-expansion",
+      title: "Priority Expansion",
+      value: byExpansion[0]?.name ?? "–",
+      description: `${byExpansion[0]?.storeCount - byExpansion[0]?.activeUMKM} toko belum UMKM — peluang ekspansi terbesar`,
+      type: "priority",
+      region: byExpansion[0]?.id ?? "",
+    },
+  ];
+
+  const builtSocializationData: SocializationRow[] = builtRegions.map((r) => ({
+    id: r.id,
+    region: r.name,
+    participants: r.participants,
+    mdProgress: r.mdProgress,
+    activeUMKM: r.activeUMKM,
+    activeItems: r.activeItems,
+  }));
+
+  const builtMonthlyTrendData = [
+    { month: "Jan", stores: Math.round(kpi.totalStores * 0.87), umkm: Math.round(kpi.umkmAktif * 0.72) },
+    { month: "Feb", stores: Math.round(kpi.totalStores * 0.89), umkm: Math.round(kpi.umkmAktif * 0.76) },
+    { month: "Mar", stores: Math.round(kpi.totalStores * 0.91), umkm: Math.round(kpi.umkmAktif * 0.80) },
+    { month: "Apr", stores: Math.round(kpi.totalStores * 0.93), umkm: Math.round(kpi.umkmAktif * 0.85) },
+    { month: "May", stores: Math.round(kpi.totalStores * 0.95), umkm: Math.round(kpi.umkmAktif * 0.89) },
+    { month: "Jun", stores: Math.round(kpi.totalStores * 0.98), umkm: Math.round(kpi.umkmAktif * 0.94) },
+    { month: "Jul", stores: kpi.totalStores, umkm: kpi.umkmAktif },
+  ];
+
+  return {
+    regions: builtRegions,
+    storeDistribution: builtStoreDistribution,
+    expansionChartData: builtExpansionChartData,
+    umkmChartData: builtUmkmChartData,
+    insightCards: builtInsightCards,
+    socializationData: builtSocializationData,
+    monthlyTrendData: builtMonthlyTrendData,
+    expansionTimeline,
+  };
+}

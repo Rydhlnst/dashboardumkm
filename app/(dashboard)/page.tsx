@@ -1,5 +1,3 @@
-"use client";
-
 import { Map, Store, Users, TrendingUp } from "lucide-react";
 import { KPICard } from "@/components/dashboard/kpi-card";
 import { SulawesiMap } from "@/components/dashboard/sulawesi-map";
@@ -12,22 +10,25 @@ import { ExpansionTimeline } from "@/components/dashboard/expansion-timeline";
 import { SocializationTable } from "@/components/dashboard/socialization-table";
 import { InsightCards } from "@/components/dashboard/insight-cards";
 import { MonthlyTrendChart } from "@/components/dashboard/monthly-trend-chart";
-import {
-  regions,
-  storeDistribution,
-  expansionChartData,
-  umkmChartData,
-  insightCards,
-  expansionTimeline,
-  socializationData,
-  monthlyTrendData,
-} from "@/data/dashboard";
-import { kpiSummary } from "@/data/area-stats";
+import { buildDashboardData } from "@/data/dashboard";
+import { getAreaStats, getKPISummary } from "@/db/queries";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const [areaStats, kpiSummary] = await Promise.all([getAreaStats(), getKPISummary()]);
+
+  const {
+    regions,
+    storeDistribution,
+    expansionChartData,
+    umkmChartData,
+    insightCards,
+    expansionTimeline,
+    socializationData,
+    monthlyTrendData,
+  } = buildDashboardData(areaStats, kpiSummary);
+
   return (
     <div className="space-y-6">
-      {/* Hero Header */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-1">
         <div>
           <h1 className="text-xl font-bold text-foreground tracking-tight">Dashboard UMKM</h1>
@@ -37,7 +38,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <KPICard
           title="Total Area"
@@ -73,7 +73,6 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Map + Expansion Status */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="xl:col-span-2">
           <SulawesiMap regions={regions} />
@@ -84,25 +83,19 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Monthly Trend + UMKM Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <MonthlyTrendChart data={monthlyTrendData} />
         <ActiveUMKMChart data={umkmChartData} />
       </div>
 
-      {/* Promotion Progress */}
       <PromotionProgress regions={regions} />
 
-      {/* PKS / MoU Status */}
       <PKSStatusPanel regions={regions} />
 
-      {/* Expansion Timeline */}
       <ExpansionTimeline data={expansionTimeline} />
 
-      {/* Socialization Table */}
       <SocializationTable data={socializationData} />
 
-      {/* Executive Insights */}
       <InsightCards cards={insightCards} />
     </div>
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { areaStats } from "@/data/area-stats";
+import { getAreaStats } from "@/db/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,7 +18,9 @@ const AREA_SLUG: Record<string, string> = {
   POHUWATO: "pohuwato",
 };
 
-export default function WilayahPage() {
+export default async function WilayahPage() {
+  const areaStats = await getAreaStats();
+
   return (
     <div className="space-y-6">
       <div>

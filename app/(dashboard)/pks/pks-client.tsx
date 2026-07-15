@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { stores } from "@/data/stores";
+import type { Store } from "@/db/schema";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
 type ACEntry = {
@@ -18,28 +18,28 @@ type ACEntry = {
   promosiTerpasang: number;
 };
 
-const acMap = new Map<string, ACEntry>();
-for (const s of stores) {
-  if (!acMap.has(s.namaAC)) {
-    acMap.set(s.namaAC, {
-      namaAC: s.namaAC,
-      namaAM: s.namaAM,
-      totalStores: 0,
-      umkmAktif: 0,
-      promosiTerpasang: 0,
-    });
-  }
-  const entry = acMap.get(s.namaAC)!;
-  entry.totalStores++;
-  if (s.umkm === "Aktif") entry.umkmAktif++;
-  if (s.saranaPromosi === "Terpasang") entry.promosiTerpasang++;
+interface Props {
+  stores: Store[];
 }
-const acList = Array.from(acMap.values()).sort((a, b) => b.totalStores - a.totalStores);
 
-const AMS = ["Semua", ...Array.from(new Set(stores.map((s) => s.namaAM))).sort()];
-const ACS = ["Semua", ...Array.from(new Set(stores.map((s) => s.namaAC))).sort()];
+export function PKSClient({ stores }: Props) {
+  const acList = useMemo(() => {
+    const acMap = new Map<string, ACEntry>();
+    for (const s of stores) {
+      if (!acMap.has(s.namaAC)) {
+        acMap.set(s.namaAC, { namaAC: s.namaAC, namaAM: s.namaAM, totalStores: 0, umkmAktif: 0, promosiTerpasang: 0 });
+      }
+      const entry = acMap.get(s.namaAC)!;
+      entry.totalStores++;
+      if (s.umkm === "Aktif") entry.umkmAktif++;
+      if (s.saranaPromosi === "Terpasang") entry.promosiTerpasang++;
+    }
+    return Array.from(acMap.values()).sort((a, b) => b.totalStores - a.totalStores);
+  }, [stores]);
 
-export default function PKSPage() {
+  const AMS = useMemo(() => ["Semua", ...Array.from(new Set(stores.map((s) => s.namaAM))).sort()], [stores]);
+  const ACS = useMemo(() => ["Semua", ...Array.from(new Set(stores.map((s) => s.namaAC))).sort()], [stores]);
+
   const [search, setSearch] = useState("");
   const [acFilter, setAcFilter] = useState("Semua");
   const [tab, setTab] = useState<"ac" | "stores">("ac");
@@ -51,7 +51,7 @@ export default function PKSPage() {
       if (q && !s.nama.toLowerCase().includes(q) && !s.namaAC.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [search, acFilter]);
+  }, [stores, search, acFilter]);
 
   const filteredAC = useMemo(() => {
     const q = search.toLowerCase();
@@ -59,7 +59,7 @@ export default function PKSPage() {
       if (q && !a.namaAC.toLowerCase().includes(q) && !a.namaAM.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [search]);
+  }, [acList, search]);
 
   return (
     <div className="space-y-5">
@@ -70,7 +70,6 @@ export default function PKSPage() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <Card className="border-border/50">
           <CardContent className="pt-4 pb-3">
@@ -92,7 +91,6 @@ export default function PKSPage() {
         </Card>
       </div>
 
-      {/* Tab toggle */}
       <div className="flex gap-1 border-b border-border">
         {(["ac", "stores"] as const).map((t) => (
           <button
@@ -109,7 +107,6 @@ export default function PKSPage() {
         ))}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -131,7 +128,6 @@ export default function PKSPage() {
         )}
       </div>
 
-      {/* AC summary table */}
       {tab === "ac" && (
         <Card className="border-border/50">
           <Table>
@@ -176,7 +172,6 @@ export default function PKSPage() {
         </Card>
       )}
 
-      {/* Store list table */}
       {tab === "stores" && (
         <Card className="border-border/50">
           <Table>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { umkmProducts, type ProductStatus } from "@/data/umkm";
+import type { UMKMProduct } from "@/db/schema";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,33 +10,43 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
-const WILAYAHS = ["Semua", ...Array.from(new Set(umkmProducts.map((p) => p.wilayah))).sort()];
+type ProductStatus = "AKTIF" | "UMKM POLITIS" | "TIDAK AKTIF";
+
 const STATUS_LABEL: Record<ProductStatus, string> = {
   AKTIF: "Aktif",
   "UMKM POLITIS": "Politis",
   "TIDAK AKTIF": "Tidak Aktif",
 };
 
-export default function UMKMPage() {
+interface Props {
+  products: UMKMProduct[];
+}
+
+export function UMKMClient({ products }: Props) {
+  const WILAYAHS = useMemo(
+    () => ["Semua", ...Array.from(new Set(products.map((p) => p.wilayah))).sort()],
+    [products]
+  );
+
   const [search, setSearch] = useState("");
   const [wilayahFilter, setWilayahFilter] = useState("Semua");
   const [statusFilter, setStatusFilter] = useState<"Semua" | ProductStatus>("Semua");
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return umkmProducts.filter((p) => {
+    return products.filter((p) => {
       if (wilayahFilter !== "Semua" && p.wilayah !== wilayahFilter) return false;
       if (statusFilter !== "Semua" && p.keterangan !== statusFilter) return false;
       if (q && !p.namaSupp.toLowerCase().includes(q) && !p.namaProduk.toLowerCase().includes(q) && !p.kodeSupp.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [search, wilayahFilter, statusFilter]);
+  }, [products, search, wilayahFilter, statusFilter]);
 
   const suppliersInView = new Set(filtered.map((p) => p.kodeSupp)).size;
 
-  const statAktif = umkmProducts.filter((p) => p.keterangan === "AKTIF").length;
-  const statPolitis = umkmProducts.filter((p) => p.keterangan === "UMKM POLITIS").length;
-  const statTidakAktif = umkmProducts.filter((p) => p.keterangan === "TIDAK AKTIF").length;
+  const statAktif = products.filter((p) => p.keterangan === "AKTIF").length;
+  const statPolitis = products.filter((p) => p.keterangan === "UMKM POLITIS").length;
+  const statTidakAktif = products.filter((p) => p.keterangan === "TIDAK AKTIF").length;
 
   return (
     <div className="space-y-5">
@@ -47,10 +57,9 @@ export default function UMKMPage() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Total PLU", value: umkmProducts.length },
+          { label: "Total PLU", value: products.length },
           { label: "PLU Aktif", value: statAktif, color: "text-emerald-600" },
           { label: "UMKM Politis", value: statPolitis, color: "text-amber-600" },
           { label: "Tidak Aktif", value: statTidakAktif, color: "text-red-600" },
@@ -64,7 +73,6 @@ export default function UMKMPage() {
         ))}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -97,7 +105,6 @@ export default function UMKMPage() {
         </span>
       </div>
 
-      {/* Table */}
       <Card className="border-border/50">
         <Table>
           <TableHeader>
@@ -129,7 +136,7 @@ export default function UMKMPage() {
                         : "bg-red-100 text-red-700 border-0 text-[10px] h-4 px-1.5"
                     }
                   >
-                    {STATUS_LABEL[p.keterangan]}
+                    {STATUS_LABEL[p.keterangan as ProductStatus]}
                   </Badge>
                 </TableCell>
               </TableRow>

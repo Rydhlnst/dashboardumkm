@@ -1,13 +1,10 @@
 "use client";
 
-import { stores } from "@/data/stores";
-import { umkmProducts } from "@/data/umkm";
-import { areaStats, kpiSummary } from "@/data/area-stats";
+import type { AreaStat } from "@/data/area-stats";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts";
 
 const AREA_COLORS = [
@@ -16,13 +13,26 @@ const AREA_COLORS = [
   "#06b6d4", "#84cc16", "#f43f5e", "#a855f7",
 ];
 
-export default function OverviewPage() {
+interface KPISummary {
+  totalAreas: number;
+  totalStores: number;
+  umkmAktif: number;
+  saranaPromosiTerpasang: number;
+  totalProducts: number;
+  suppliersAktif: number;
+}
+
+interface Props {
+  areaStats: AreaStat[];
+  kpiSummary: KPISummary;
+  prodAktif: number;
+  prodPolitis: number;
+  prodTidakAktif: number;
+}
+
+export function OverviewClient({ areaStats, kpiSummary, prodAktif, prodPolitis, prodTidakAktif }: Props) {
   const umkmCoverage = Math.round((kpiSummary.umkmAktif / kpiSummary.totalStores) * 100);
   const promosiCoverage = Math.round((kpiSummary.saranaPromosiTerpasang / kpiSummary.totalStores) * 100);
-
-  const prodAktif = umkmProducts.filter((p) => p.keterangan === "AKTIF").length;
-  const prodPolitis = umkmProducts.filter((p) => p.keterangan === "UMKM POLITIS").length;
-  const prodTidakAktif = umkmProducts.filter((p) => p.keterangan === "TIDAK AKTIF").length;
 
   const chartData = areaStats.map((a, i) => ({
     area: a.area.split(" ").map((w) => w[0]).join("").slice(0, 4),
@@ -41,7 +51,6 @@ export default function OverviewPage() {
         </p>
       </div>
 
-      {/* KPI Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Toko", value: kpiSummary.totalStores, sub: `${kpiSummary.totalAreas} wilayah` },
@@ -59,7 +68,6 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      {/* Coverage bars */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-border/50">
           <CardHeader className="pb-3">
@@ -100,7 +108,6 @@ export default function OverviewPage() {
         </Card>
       </div>
 
-      {/* Bar chart */}
       <Card className="border-border/50">
         <CardHeader className="pb-2">
           <p className="text-sm font-semibold">Distribusi Toko & UMKM Aktif per Wilayah</p>
@@ -108,12 +115,7 @@ export default function OverviewPage() {
         <CardContent>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={chartData} barGap={2} barCategoryGap="30%">
-              <XAxis
-                dataKey="area"
-                tick={{ fontSize: 10 }}
-                axisLine={false}
-                tickLine={false}
-              />
+              <XAxis dataKey="area" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={28} />
               <Tooltip
                 contentStyle={{ fontSize: 11, border: "1px solid var(--border)" }}
@@ -127,7 +129,6 @@ export default function OverviewPage() {
         </CardContent>
       </Card>
 
-      {/* PLU status breakdown */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
           <p className="text-sm font-semibold">Status PLU UMKM</p>

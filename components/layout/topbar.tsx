@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./sidebar";
 import { ExportButton } from "./export-button";
+import { LogoutButton } from "./logout-button";
 
 interface TopbarProps {
   title?: string;
@@ -62,6 +63,8 @@ export function Topbar({ title, subtitle }: TopbarProps) {
           Filter
         </Button>
         <ExportButton />
+        <Separator orientation="vertical" className="h-5" />
+        <LogoutButton />
       </div>
     </header>
   );
