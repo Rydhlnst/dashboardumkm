@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./sidebar";
 import { ExportButton } from "./export-button";
 import { LogoutButton } from "./logout-button";
+import { TourToggle } from "@/components/tour/tour-toggle";
 
 interface TopbarProps {
   title?: string;
@@ -63,6 +64,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
           Filter
         </Button>
         <ExportButton />
+        <TourToggle />
         <Separator orientation="vertical" className="h-5" />
         <LogoutButton />
       </div>

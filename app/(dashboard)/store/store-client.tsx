@@ -64,7 +64,7 @@ export function StoreClient({ stores }: Props) {
             {stores.length} toko terdaftar di seluruh wilayah
           </p>
         </div>
-        <Button asChild size="sm" className="bg-red-600 hover:bg-red-700 text-white h-8 gap-1.5">
+        <Button data-tour="store-add" asChild size="sm" className="bg-red-600 hover:bg-red-700 text-white h-8 gap-1.5">
           <Link href="/store/new">
             <Plus className="w-3.5 h-3.5" />
             Tambah Toko
@@ -72,7 +72,7 @@ export function StoreClient({ stores }: Props) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div data-tour="store-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total Toko", value: stores.length },
           { label: "UMKM Aktif", value: stores.filter((s) => s.umkm === "Aktif").length },
@@ -89,7 +89,7 @@ export function StoreClient({ stores }: Props) {
       </div>
 
       <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-48">
+        <div data-tour="store-search" className="relative flex-1 min-w-48">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
             placeholder="Cari nama atau kode toko..."

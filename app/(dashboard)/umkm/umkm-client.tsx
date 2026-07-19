@@ -71,7 +71,7 @@ export function UMKMClient({ products }: Props) {
             Daftar produk & supplier UMKM yang terdaftar di sistem
           </p>
         </div>
-        <Button asChild size="sm" className="bg-red-600 hover:bg-red-700 text-white h-8 gap-1.5">
+        <Button data-tour="umkm-add" asChild size="sm" className="bg-red-600 hover:bg-red-700 text-white h-8 gap-1.5">
           <Link href="/umkm/new">
             <Plus className="w-3.5 h-3.5" />
             Tambah PLU
@@ -79,7 +79,7 @@ export function UMKMClient({ products }: Props) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div data-tour="umkm-stats" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total PLU", value: products.length },
           { label: "PLU Aktif", value: statAktif, color: "text-emerald-600" },
@@ -95,8 +95,8 @@ export function UMKMClient({ products }: Props) {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-48">
+      <div data-tour="umkm-filters" className="flex flex-wrap gap-3 items-center">
+        <div data-tour="umkm-search" className="relative flex-1 min-w-48">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
             placeholder="Cari supplier atau produk..."

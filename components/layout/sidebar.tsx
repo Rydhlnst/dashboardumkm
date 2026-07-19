@@ -43,7 +43,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav data-tour="sidebar-nav" className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         <p className="px-2 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
           Navigation
         </p>

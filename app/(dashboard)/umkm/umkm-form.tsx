@@ -51,7 +51,7 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
           <p className="text-sm font-semibold">Informasi Supplier</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div data-tour="form-wilayah">
             <Label htmlFor="wilayah" className="text-xs">Wilayah <span className="text-red-500">*</span></Label>
             <select
               id="wilayah"
@@ -65,7 +65,7 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.wilayah} />
           </div>
 
-          <div>
+          <div data-tour="form-kodeSupp">
             <Label htmlFor="kodeSupp" className="text-xs">Kode Supplier <span className="text-red-500">*</span></Label>
             <Input
               id="kodeSupp"
@@ -77,7 +77,7 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.kodeSupp} />
           </div>
 
-          <div className="sm:col-span-2">
+          <div data-tour="form-namaSupp" className="sm:col-span-2">
             <Label htmlFor="namaSupp" className="text-xs">Nama Supplier <span className="text-red-500">*</span></Label>
             <Input
               id="namaSupp"
@@ -96,7 +96,7 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
           <p className="text-sm font-semibold">Informasi Produk</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div data-tour="form-plu">
             <Label htmlFor="plu" className="text-xs">PLU <span className="text-red-500">*</span></Label>
             <Input
               id="plu"
@@ -109,7 +109,7 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.plu} />
           </div>
 
-          <div>
+          <div data-tour="form-totalPlu">
             <Label htmlFor="totalPlu" className="text-xs">Total PLU</Label>
             <Input
               id="totalPlu"
@@ -121,7 +121,7 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.totalPlu} />
           </div>
 
-          <div className="sm:col-span-2">
+          <div data-tour="form-namaProduk" className="sm:col-span-2">
             <Label htmlFor="namaProduk" className="text-xs">Nama Produk <span className="text-red-500">*</span></Label>
             <Input
               id="namaProduk"
@@ -133,7 +133,7 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.namaProduk} />
           </div>
 
-          <div>
+          <div data-tour="form-keterangan">
             <Label htmlFor="keterangan" className="text-xs">Status <span className="text-red-500">*</span></Label>
             <select
               id="keterangan"
@@ -150,8 +150,10 @@ export function UMKMForm({ action, defaultValues, isEdit }: Props) {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3">
-        <SubmitButton label={isEdit ? "Simpan Perubahan" : "Tambah PLU"} />
+      <div data-tour="form-verify" className="flex gap-3" id="form-verify-anchor">
+        <div data-tour="form-submit">
+          <SubmitButton label={isEdit ? "Simpan Perubahan" : "Tambah PLU"} />
+        </div>
         <Button variant="outline" asChild className="h-9">
           <Link href="/umkm">Batal</Link>
         </Button>

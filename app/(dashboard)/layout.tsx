@@ -1,5 +1,7 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
+import { TourProvider } from "@/components/tour/tour-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function DashboardLayout({
   children,
@@ -8,6 +10,8 @@ export default function DashboardLayout({
 }) {
   return (
     <>
+      <TourProvider />
+      <Toaster />
       <Sidebar />
       <div className="lg:pl-60 flex flex-col min-h-screen">
         <Topbar

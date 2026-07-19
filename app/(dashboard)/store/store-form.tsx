@@ -51,7 +51,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
           <p className="text-sm font-semibold">Informasi Toko</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div data-tour="sform-kode">
             <Label htmlFor="kode" className="text-xs">Kode Toko <span className="text-red-500">*</span></Label>
             <Input
               id="kode"
@@ -63,7 +63,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.kode} />
           </div>
 
-          <div className="sm:col-span-2">
+          <div data-tour="sform-nama" className="sm:col-span-2">
             <Label htmlFor="nama" className="text-xs">Nama Toko <span className="text-red-500">*</span></Label>
             <Input
               id="nama"
@@ -75,7 +75,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.nama} />
           </div>
 
-          <div className="sm:col-span-2">
+          <div data-tour="sform-alamat" className="sm:col-span-2">
             <Label htmlFor="alamat" className="text-xs">Alamat <span className="text-red-500">*</span></Label>
             <Input
               id="alamat"
@@ -87,7 +87,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.alamat} />
           </div>
 
-          <div>
+          <div data-tour="sform-kelurahan">
             <Label htmlFor="kelurahan" className="text-xs">Kelurahan <span className="text-red-500">*</span></Label>
             <Input
               id="kelurahan"
@@ -98,7 +98,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.kelurahan} />
           </div>
 
-          <div>
+          <div data-tour="sform-kecamatan">
             <Label htmlFor="kecamatan" className="text-xs">Kecamatan <span className="text-red-500">*</span></Label>
             <Input
               id="kecamatan"
@@ -109,7 +109,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.kecamatan} />
           </div>
 
-          <div>
+          <div data-tour="sform-kabupaten">
             <Label htmlFor="kabupaten" className="text-xs">Kabupaten/Kota <span className="text-red-500">*</span></Label>
             <Input
               id="kabupaten"
@@ -120,7 +120,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.kabupaten} />
           </div>
 
-          <div>
+          <div data-tour="sform-area">
             <Label htmlFor="area" className="text-xs">Area <span className="text-red-500">*</span></Label>
             <select
               id="area"
@@ -141,7 +141,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
           <p className="text-sm font-semibold">Koordinator & Manager</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div data-tour="sform-namaAC">
             <Label htmlFor="namaAC" className="text-xs">Nama AC (Area Coordinator) <span className="text-red-500">*</span></Label>
             <Input
               id="namaAC"
@@ -152,7 +152,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.namaAC} />
           </div>
 
-          <div>
+          <div data-tour="sform-namaAM">
             <Label htmlFor="namaAM" className="text-xs">Nama AM (Area Manager) <span className="text-red-500">*</span></Label>
             <Input
               id="namaAM"
@@ -170,7 +170,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
           <p className="text-sm font-semibold">Status</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div data-tour="sform-umkm">
             <Label htmlFor="umkm" className="text-xs">Status UMKM <span className="text-red-500">*</span></Label>
             <select
               id="umkm"
@@ -184,7 +184,7 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
             <FieldError errors={state.errors?.umkm} />
           </div>
 
-          <div>
+          <div data-tour="sform-saranaPromosi">
             <Label htmlFor="saranaPromosi" className="text-xs">Sarana Promosi <span className="text-red-500">*</span></Label>
             <select
               id="saranaPromosi"
@@ -200,8 +200,10 @@ export function StoreForm({ action, defaultValues, isEdit }: Props) {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3">
-        <SubmitButton label={isEdit ? "Simpan Perubahan" : "Tambah Toko"} />
+      <div data-tour="sform-verify" className="flex gap-3">
+        <div data-tour="sform-submit">
+          <SubmitButton label={isEdit ? "Simpan Perubahan" : "Tambah Toko"} />
+        </div>
         <Button variant="outline" asChild className="h-9">
           <Link href="/store">Batal</Link>
         </Button>
