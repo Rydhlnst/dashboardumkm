@@ -40,19 +40,23 @@ export function TourToggle() {
     <div className="flex items-center" data-tour="topbar-tour">
       <Button
         variant={enabled ? "default" : "outline"}
-        size="sm"
+        size="icon"
         onClick={handleClick}
         className={
           enabled
-            ? "h-8 gap-1.5 text-xs bg-red-600 hover:bg-red-700 text-white"
-            : "h-8 gap-1.5 text-xs"
+            ? "h-8 w-8 bg-red-600 hover:bg-red-700 text-white"
+            : "h-8 w-8"
         }
-        title={enabled ? "Jalankan tutorial halaman ini" : "Aktifkan tutorial"}
+        title={
+          enabled
+            ? running
+              ? "Jeda tutorial"
+              : "Jalankan tutorial halaman ini"
+            : "Aktifkan tutorial"
+        }
+        aria-label="Tutorial"
       >
-        <HelpCircle className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">
-          {enabled ? (running ? "Jeda Tutorial" : "Tutorial") : "Aktifkan Tutorial"}
-        </span>
+        <HelpCircle className="w-4 h-4" />
       </Button>
       {enabled && (
         <Button

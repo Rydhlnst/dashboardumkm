@@ -12,7 +12,8 @@ export interface Region {
   promotionInstalled: number;
   promotionTotal: number;
   pksStatus: PKSStatus;
-  coordinates: { x: number; y: number };
+  lat: number;
+  lng: number;
   trend: RegionTrend;
   trendValue: number;
   participants: number;

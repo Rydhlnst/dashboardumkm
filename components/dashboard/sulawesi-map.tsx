@@ -11,22 +11,6 @@ import type { Region } from "@/types";
 
 const GEO_URL = "/geo/sulawesi.json";
 
-// Real coordinates [lng, lat] for each region id — matches AREA_CFG ids
-const REGION_COORDS: Record<string, [number, number]> = {
-  palu: [119.8707, -0.8917],
-  donggala: [119.7288, -0.6851],
-  sigi: [119.9739, -1.4136],
-  "parigi-moutong": [120.1747, -0.4707],
-  poso: [120.7524, -1.3959],
-  tolitoli: [120.7955, 1.0546],
-  buol: [121.4306, 1.1085],
-  banggai: [122.7975, -1.3006],
-  pasangkayu: [119.3699, -1.2213],
-  "tojo-una-una": [121.5416, -1.1899],
-  mamuju: [118.8886, -2.6748],
-  pohuwato: [121.5730, 0.7080],
-};
-
 const expansionFill = {
   open: "#10b981",
   conditional: "#f59e0b",
@@ -96,8 +80,8 @@ export function SulawesiMap({ regions }: SulawesiMapProps) {
             </Geographies>
 
             {regions.map((region) => {
-              const coord = REGION_COORDS[region.id];
-              if (!coord) return null;
+              if (!region.lat && !region.lng) return null;
+              const coord: [number, number] = [region.lng, region.lat];
               const fill = expansionFill[region.expansionStatus];
               const isSelected = selected?.id === region.id;
               const isHovered = tooltip?.region.id === region.id;

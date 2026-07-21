@@ -31,6 +31,14 @@ export const AreaSettingSchema = z.object({
   targetDate: z.string().max(30).default(""),
   newStores: z.array(z.string()).default([]),
   notes: z.string().default(""),
+  lat: z.coerce.number().min(-90).max(90).default(0),
+  lng: z.coerce.number().min(-180).max(180).default(0),
+  shortName: z.string().max(20).default(""),
+  trend: z.enum(["up", "down", "stable"]).default("stable"),
+  trendValue: z.coerce.number().default(0),
+  participants: z.coerce.number().int().nonnegative().default(0),
+  mdProgress: z.coerce.number().int().min(0).max(100).default(0),
+  activeItems: z.coerce.number().int().nonnegative().default(0),
 });
 
 export type StoreInput = z.infer<typeof StoreSchema>;

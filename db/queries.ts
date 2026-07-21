@@ -123,6 +123,10 @@ export async function updateAreaSetting(area: string, data: AreaSettingInput) {
   return row;
 }
 
+export async function deleteAreaSetting(area: string) {
+  await db.delete(areaSettings).where(eq(areaSettings.area, area));
+}
+
 export async function upsertAreaSetting(area: string, data: AreaSettingInput) {
   const existing = await db
     .select()

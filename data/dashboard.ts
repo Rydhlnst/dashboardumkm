@@ -19,6 +19,14 @@ type AreaSettingLike = {
   timelineStatus: "planned" | "in_progress" | "completed";
   targetDate: string;
   newStores: string[];
+  lat?: number | null;
+  lng?: number | null;
+  shortName?: string | null;
+  trend?: "up" | "down" | "stable" | null;
+  trendValue?: number | null;
+  participants?: number | null;
+  mdProgress?: number | null;
+  activeItems?: number | null;
 };
 
 type KPISummary = {
@@ -30,12 +38,14 @@ type KPISummary = {
   suppliersAktif: number;
 };
 
-// Static config for fields not derivable from real data (coordinates, PKS, trend, pipeline)
-const AREA_CFG: Record<string, {
+// Static seed defaults — used only when the DB row is missing values (fresh install).
+// Once area_settings has values, DB always wins.
+export const AREA_CFG: Record<string, {
   id: string;
   name: string;
   shortName: string;
-  coordinates: { x: number; y: number };
+  lat: number;
+  lng: number;
   pksStatus: "available" | "not_available";
   trend: "up" | "down" | "stable";
   trendValue: number;
@@ -46,108 +56,154 @@ const AREA_CFG: Record<string, {
 }> = {
   "PALU": {
     id: "palu", name: "Palu", shortName: "PLU",
-    coordinates: { x: 52, y: 40 }, pksStatus: "available",
+    lat: -0.8917, lng: 119.8707, pksStatus: "available",
     trend: "up", trendValue: 12.4, participants: 156, mdProgress: 82, activeItems: 214,
     newStores: ["Palu Timur 3", "Palu Barat 7", "Palu Selatan 2"],
   },
   "DONGGALA": {
     id: "donggala", name: "Donggala", shortName: "DGL",
-    coordinates: { x: 42, y: 34 }, pksStatus: "available",
+    lat: -0.6851, lng: 119.7288, pksStatus: "available",
     trend: "up", trendValue: 8.1, participants: 98, mdProgress: 74, activeItems: 147,
     newStores: ["Donggala Pusat 2", "Balaesang 1"],
   },
   "SIGI": {
     id: "sigi", name: "Sigi", shortName: "SGI",
-    coordinates: { x: 50, y: 50 }, pksStatus: "available",
+    lat: -1.4136, lng: 119.9739, pksStatus: "available",
     trend: "up", trendValue: 5.3, participants: 72, mdProgress: 61, activeItems: 89,
     newStores: ["Sigi Biromaru 1"],
   },
   "PARIGI MOUTONG": {
     id: "parigi-moutong", name: "Parigi Moutong", shortName: "PMO",
-    coordinates: { x: 64, y: 36 }, pksStatus: "available",
+    lat: -0.4707, lng: 120.1747, pksStatus: "available",
     trend: "stable", trendValue: 1.2, participants: 118, mdProgress: 78, activeItems: 176,
     newStores: ["Parigi 3", "Moutong 2"],
   },
   "POSO": {
     id: "poso", name: "Poso", shortName: "PSO",
-    coordinates: { x: 68, y: 52 }, pksStatus: "not_available",
+    lat: -1.3959, lng: 120.7524, pksStatus: "not_available",
     trend: "down", trendValue: -2.1, participants: 84, mdProgress: 55, activeItems: 102,
     newStores: ["Poso Kota 1"],
   },
   "TOLI-TOLI": {
     id: "tolitoli", name: "Toli-Toli", shortName: "TTL",
-    coordinates: { x: 44, y: 22 }, pksStatus: "available",
+    lat: 1.0546, lng: 120.7955, pksStatus: "available",
     trend: "stable", trendValue: 0.8, participants: 76, mdProgress: 68, activeItems: 121,
     newStores: ["Tolitoli 1"],
   },
   "BUOL": {
     id: "buol", name: "Buol", shortName: "BUL",
-    coordinates: { x: 38, y: 16 }, pksStatus: "not_available",
+    lat: 1.1085, lng: 121.4306, pksStatus: "not_available",
     trend: "down", trendValue: -3.2, participants: 42, mdProgress: 35, activeItems: 48,
     newStores: [],
   },
   "BANGGAI": {
     id: "banggai", name: "Banggai", shortName: "BNG",
-    coordinates: { x: 84, y: 46 }, pksStatus: "available",
+    lat: -1.3006, lng: 122.7975, pksStatus: "available",
     trend: "up", trendValue: 9.3, participants: 106, mdProgress: 79, activeItems: 158,
     newStores: ["Luwuk 2", "Batui 1"],
   },
   "PASANGKAYU": {
     id: "pasangkayu", name: "Pasangkayu", shortName: "PSK",
-    coordinates: { x: 34, y: 62 }, pksStatus: "not_available",
+    lat: -1.2213, lng: 119.3699, pksStatus: "not_available",
     trend: "stable", trendValue: 0.5, participants: 38, mdProgress: 30, activeItems: 42,
     newStores: [],
   },
   "TOJO UNA-UNA": {
     id: "tojo-una-una", name: "Tojo Una-Una", shortName: "TJU",
-    coordinates: { x: 76, y: 38 }, pksStatus: "not_available",
+    lat: -1.1899, lng: 121.5416, pksStatus: "not_available",
     trend: "down", trendValue: -1.5, participants: 34, mdProgress: 28, activeItems: 36,
     newStores: [],
   },
   "MAMUJU": {
     id: "mamuju", name: "Mamuju", shortName: "MMJ",
-    coordinates: { x: 28, y: 58 }, pksStatus: "not_available",
+    lat: -2.6748, lng: 118.8886, pksStatus: "not_available",
     trend: "stable", trendValue: 0.3, participants: 28, mdProgress: 22, activeItems: 30,
     newStores: [],
   },
   "POHUWATO": {
     id: "pohuwato", name: "Pohuwato", shortName: "PHW",
-    coordinates: { x: 22, y: 22 }, pksStatus: "not_available",
+    lat: 0.7080, lng: 121.5730, pksStatus: "not_available",
     trend: "stable", trendValue: 0.2, participants: 22, mdProgress: 18, activeItems: 24,
     newStores: [],
   },
 };
 
-// Build regions from real data, merging DB area_settings (fallback: static AREA_CFG defaults).
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function titleCase(s: string): string {
+  return s
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+// Build regions from real data, merging DB area_settings.
+// Iterates the UNION of areas seen in stats and settings, so DB-only regions
+// (zero stores) still appear on the map.
 export function buildRegions(
   stats: AreaStat[],
   settings: AreaSettingLike[] = []
 ): Region[] {
+  const statByArea = new Map(stats.map((s) => [s.area, s]));
   const settingByArea = new Map(settings.map((s) => [s.area, s]));
+  const allAreas = new Set<string>([...statByArea.keys(), ...settingByArea.keys()]);
   const result: Region[] = [];
-  for (const stat of stats) {
-    const cfg = AREA_CFG[stat.area];
-    if (!cfg) continue;
-    const setting = settingByArea.get(stat.area);
+  for (const area of allAreas) {
+    const stat = statByArea.get(area) ?? {
+      area,
+      totalStores: 0,
+      umkmAktif: 0,
+      saranaPromosi: 0,
+      umkmCoverage: 0,
+      promosiCoverage: 0,
+    };
+    const cfg = AREA_CFG[area] ?? {
+      id: slugify(area),
+      name: titleCase(area),
+      shortName: area.slice(0, 3).toUpperCase(),
+      lat: 0,
+      lng: 0,
+      pksStatus: "not_available" as const,
+      trend: "stable" as const,
+      trendValue: 0,
+      participants: 0,
+      mdProgress: 0,
+      activeItems: 0,
+      newStores: [] as string[],
+    };
+    const setting = settingByArea.get(area);
     const expansionStatus: ExpansionStatus = setting?.expansionStatus ?? "closed";
     const pksStatus: PKSStatus = setting?.pksStatus ?? cfg.pksStatus;
     const newStores = setting?.newStores?.length ? setting.newStores : cfg.newStores;
+    // Treat 0 as "unset" for numeric fields — DB defaults are 0 on fresh columns.
+    const pick = <T>(v: T | null | undefined, fallback: T): T =>
+      v === null || v === undefined ? fallback : v;
+    const pickNonZero = (v: number | null | undefined, fallback: number): number =>
+      v === null || v === undefined || v === 0 ? fallback : v;
     result.push({
       id: cfg.id,
       name: cfg.name,
-      shortName: cfg.shortName,
+      shortName: pick(setting?.shortName, cfg.shortName) || cfg.shortName,
       storeCount: stat.totalStores,
       activeUMKM: stat.umkmAktif,
       promotionInstalled: stat.saranaPromosi,
       promotionTotal: stat.totalStores,
       expansionStatus,
       pksStatus,
-      coordinates: cfg.coordinates,
-      trend: cfg.trend,
-      trendValue: cfg.trendValue,
-      participants: cfg.participants,
-      mdProgress: cfg.mdProgress,
-      activeItems: cfg.activeItems,
+      lat: pickNonZero(setting?.lat, cfg.lat),
+      lng: pickNonZero(setting?.lng, cfg.lng),
+      trend: pick(setting?.trend, cfg.trend),
+      trendValue: pick(setting?.trendValue, cfg.trendValue),
+      participants: pickNonZero(setting?.participants, cfg.participants),
+      mdProgress: pickNonZero(setting?.mdProgress, cfg.mdProgress),
+      activeItems: pickNonZero(setting?.activeItems, cfg.activeItems),
       newStores,
     });
   }
@@ -158,21 +214,23 @@ export function buildTimeline(
   stats: AreaStat[],
   settings: AreaSettingLike[]
 ): TimelineEntry[] {
-  const settingByArea = new Map(settings.map((s) => [s.area, s]));
-  return stats
-    .map((stat) => {
-      const cfg = AREA_CFG[stat.area];
-      const setting = settingByArea.get(stat.area);
-      if (!cfg || !setting) return null;
-      return {
-        regionId: cfg.id,
-        regionName: cfg.name,
-        newStores: setting.newStores?.length ? setting.newStores : cfg.newStores,
-        targetDate: setting.targetDate || "—",
-        status: setting.timelineStatus,
-      } as TimelineEntry;
-    })
-    .filter((x): x is TimelineEntry => x !== null);
+  const statByArea = new Map(stats.map((s) => [s.area, s]));
+  const allAreas = new Set<string>([...statByArea.keys(), ...settings.map((s) => s.area)]);
+  const result: TimelineEntry[] = [];
+  for (const area of allAreas) {
+    const setting = settings.find((s) => s.area === area);
+    if (!setting) continue;
+    const cfg = AREA_CFG[area];
+    const fallbackNewStores = cfg?.newStores ?? [];
+    result.push({
+      regionId: cfg?.id ?? slugify(area),
+      regionName: cfg?.name ?? titleCase(area),
+      newStores: setting.newStores?.length ? setting.newStores : fallbackNewStores,
+      targetDate: setting.targetDate || "—",
+      status: setting.timelineStatus,
+    });
+  }
+  return result;
 }
 
 export const regions: Region[] = buildRegions(areaStats);

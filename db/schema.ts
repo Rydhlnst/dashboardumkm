@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, varchar, text, json } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, varchar, text, json, doublePrecision } from "drizzle-orm/pg-core";
 
 export const stores = pgTable("stores", {
   id: serial("id").primaryKey(),
@@ -46,6 +46,17 @@ export const areaSettings = pgTable("area_settings", {
   targetDate: varchar("target_date", { length: 30 }).notNull().default(""),
   newStores: json("new_stores").$type<string[]>().notNull().default([]),
   notes: text("notes").notNull().default(""),
+  lat: doublePrecision("lat").notNull().default(0),
+  lng: doublePrecision("lng").notNull().default(0),
+  shortName: varchar("short_name", { length: 20 }).notNull().default(""),
+  trend: varchar("trend", { length: 10 })
+    .notNull()
+    .$type<"up" | "down" | "stable">()
+    .default("stable"),
+  trendValue: doublePrecision("trend_value").notNull().default(0),
+  participants: integer("participants").notNull().default(0),
+  mdProgress: integer("md_progress").notNull().default(0),
+  activeItems: integer("active_items").notNull().default(0),
 });
 
 export type Store = typeof stores.$inferSelect;
