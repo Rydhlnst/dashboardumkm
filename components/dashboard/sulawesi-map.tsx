@@ -2,24 +2,42 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SectionHeader } from "./section-header";
 import { ExpansionBadge } from "./status-badge";
 import { Map, X } from "lucide-react";
 import type { Region } from "@/types";
-import { cn } from "@/lib/utils";
+
+const GEO_URL = "/geo/sulawesi.json";
+
+// Real coordinates [lng, lat] for each region id — matches AREA_CFG ids
+const REGION_COORDS: Record<string, [number, number]> = {
+  palu: [119.8707, -0.8917],
+  donggala: [119.7288, -0.6851],
+  sigi: [119.9739, -1.4136],
+  "parigi-moutong": [120.1747, -0.4707],
+  poso: [120.7524, -1.3959],
+  tolitoli: [120.7955, 1.0546],
+  buol: [121.4306, 1.1085],
+  banggai: [122.7975, -1.3006],
+  pasangkayu: [119.3699, -1.2213],
+  "tojo-una-una": [121.5416, -1.1899],
+  mamuju: [118.8886, -2.6748],
+  pohuwato: [121.5730, 0.7080],
+};
+
+const expansionFill = {
+  open: "#10b981",
+  conditional: "#f59e0b",
+  closed: "#ef4444",
+} as const;
 
 interface TooltipState {
   region: Region;
-  x: number;
-  y: number;
+  cx: number;
+  cy: number;
 }
-
-const expansionColor = {
-  open: { dot: "fill-emerald-500", ring: "stroke-emerald-400", bg: "bg-emerald-50 border-emerald-200" },
-  conditional: { dot: "fill-amber-500", ring: "stroke-amber-400", bg: "bg-amber-50 border-amber-200" },
-  closed: { dot: "fill-red-500", ring: "stroke-red-400", bg: "bg-red-50 border-red-200" },
-};
 
 interface SulawesiMapProps {
   regions: Region[];
@@ -29,21 +47,11 @@ export function SulawesiMap({ regions }: SulawesiMapProps) {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const [selected, setSelected] = useState<Region | null>(null);
 
-  const handleMouseEnter = (region: Region, e: React.MouseEvent<SVGCircleElement>) => {
-    const svgEl = (e.target as SVGCircleElement).closest("svg");
-    if (!svgEl) return;
-    const rect = svgEl.getBoundingClientRect();
-    const pt = svgEl.createSVGPoint();
-    pt.x = e.clientX;
-    pt.y = e.clientY;
-    setTooltip({ region, x: region.coordinates.x, y: region.coordinates.y });
-  };
-
   return (
     <Card className="border-border/60 overflow-hidden">
       <CardHeader className="pb-3 px-5 pt-5">
         <SectionHeader
-          title="Interactive Region Map — Sulawesi Tengah"
+          title="Interactive Region Map — Sulawesi"
           description="12 kabupaten/kota — hover to preview, click to select"
           iconSlot={<Map className="w-4 h-4 text-muted-foreground" />}
           action={
@@ -56,133 +64,81 @@ export function SulawesiMap({ regions }: SulawesiMapProps) {
         />
       </CardHeader>
       <CardContent className="px-5 pb-5">
-        <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
-          <svg
-            viewBox="0 0 100 65"
-            className="w-full h-full"
-            onMouseLeave={() => setTooltip(null)}
+        <div
+          className="relative w-full rounded-lg bg-gradient-to-br from-slate-50 to-slate-100"
+          style={{ aspectRatio: "16/10" }}
+          onMouseLeave={() => setTooltip(null)}
+        >
+          <ComposableMap
+            projection="geoMercator"
+            projectionConfig={{
+              scale: 2400,
+              center: [121, -1.5],
+            }}
+            width={800}
+            height={500}
+            style={{ width: "100%", height: "100%" }}
           >
-            {/* Stylized Sulawesi outline */}
-            <defs>
-              <linearGradient id="mapBg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#f8fafc" />
-                <stop offset="100%" stopColor="#f1f5f9" />
-              </linearGradient>
-              <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-                <feDropShadow dx="0" dy="1" stdDeviation="1" floodOpacity="0.08" />
-              </filter>
-            </defs>
-            <rect width="100" height="65" fill="url(#mapBg)" rx="1" />
+            <Geographies geography={GEO_URL}>
+              {({ geographies }) =>
+                geographies.map((geo) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    style={{
+                      default: { fill: "#e2e8f0", stroke: "#94a3b8", strokeWidth: 0.5, outline: "none" },
+                      hover: { fill: "#cbd5e1", outline: "none" },
+                      pressed: { fill: "#cbd5e1", outline: "none" },
+                    }}
+                  />
+                ))
+              }
+            </Geographies>
 
-            {/* Simplified Sulawesi shape */}
-            <path
-              d="M38 14 L44 12 L50 14 L54 18 L58 20 L62 22 L66 24 L70 26 L74 30 L78 34 L80 40 L82 46 L84 50 L86 52 L88 56 L86 60 L82 62 L78 58 L76 54 L74 50 L72 46 L70 42 L68 38 L66 34 L64 30 L60 28 L56 26 L52 26 L50 28 L50 32 L52 36 L54 42 L56 48 L56 54 L54 58 L50 60 L46 58 L44 54 L44 48 L44 42 L42 38 L40 34 L38 30 L36 26 L34 22 L36 18 Z"
-              fill="#e2e8f0"
-              stroke="#cbd5e1"
-              strokeWidth="0.3"
-              filter="url(#shadow)"
-            />
-            {/* Northern arm */}
-            <path
-              d="M44 12 L42 10 L40 8 L38 7 L36 8 L34 10 L32 12 L30 14 L32 16 L36 14 L40 12 Z"
-              fill="#e2e8f0"
-              stroke="#cbd5e1"
-              strokeWidth="0.3"
-            />
-            {/* Island indicators for Banggai Kepulauan and Banggai Laut */}
-            <ellipse cx="91" cy="54" rx="3" ry="2" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="0.3" />
-            <ellipse cx="89" cy="60" rx="2.5" ry="1.5" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="0.3" />
-
-            {/* Grid lines */}
-            {[20, 40, 60, 80].map((x) => (
-              <line key={`vl-${x}`} x1={x} y1="0" x2={x} y2="65" stroke="#e2e8f0" strokeWidth="0.2" strokeDasharray="1,2" />
-            ))}
-            {[20, 40].map((y) => (
-              <line key={`hl-${y}`} x1="0" y1={y} x2="100" y2={y} stroke="#e2e8f0" strokeWidth="0.2" strokeDasharray="1,2" />
-            ))}
-
-            {/* Region dots */}
             {regions.map((region) => {
-              const colors = expansionColor[region.expansionStatus];
+              const coord = REGION_COORDS[region.id];
+              if (!coord) return null;
+              const fill = expansionFill[region.expansionStatus];
               const isSelected = selected?.id === region.id;
               const isHovered = tooltip?.region.id === region.id;
+              const r = isSelected ? 8 : 6;
 
               return (
-                <g key={region.id}>
+                <Marker
+                  key={region.id}
+                  coordinates={coord}
+                  onMouseEnter={() => setTooltip({ region, cx: coord[0], cy: coord[1] })}
+                  onMouseLeave={() => setTooltip(null)}
+                  onClick={() => setSelected(selected?.id === region.id ? null : region)}
+                  style={{ cursor: "pointer" } as React.CSSProperties}
+                >
                   {(isSelected || isHovered) && (
-                    <circle
-                      cx={region.coordinates.x}
-                      cy={region.coordinates.y}
-                      r="4.5"
-                      className={colors.ring}
-                      fill="none"
-                      strokeWidth="0.8"
-                      opacity="0.6"
-                    />
+                    <circle r={r + 5} fill="none" stroke={fill} strokeWidth={1.5} opacity={0.5} />
                   )}
-                  <circle
-                    cx={region.coordinates.x}
-                    cy={region.coordinates.y}
-                    r={isSelected ? "3.2" : "2.4"}
-                    className={cn(colors.dot, "cursor-pointer transition-all duration-150")}
-                    strokeWidth={isSelected ? "0.8" : "0"}
-                    stroke="white"
-                    onMouseEnter={(e) => handleMouseEnter(region, e)}
-                    onMouseLeave={() => setTooltip(null)}
-                    onClick={() => setSelected(selected?.id === region.id ? null : region)}
-                  />
+                  <circle r={r} fill={fill} stroke="white" strokeWidth={1.5} />
                   <text
-                    x={region.coordinates.x}
-                    y={region.coordinates.y + 5.5}
+                    y={r + 10}
                     textAnchor="middle"
-                    fontSize="2.8"
-                    fill="#475569"
-                    className="pointer-events-none select-none font-medium"
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      fill: "#334155",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
                   >
                     {region.shortName}
                   </text>
-                </g>
+                </Marker>
               );
             })}
-          </svg>
+          </ComposableMap>
 
-          {/* Tooltip */}
+          {/* Tooltip — positioned via lng/lat converted to % of the map's bounding box.
+              We use a rough linear mapping based on projection center/scale — good enough for hover popovers. */}
           <AnimatePresence>
             {tooltip && !selected && (
-              <motion.div
-                key="tooltip"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.12 }}
-                className="absolute z-10 pointer-events-none"
-                style={{
-                  left: `${tooltip.x}%`,
-                  top: `${tooltip.y}%`,
-                  transform: "translate(-50%, -130%)",
-                }}
-              >
-                <div className="bg-white border border-border rounded-xl shadow-lg p-3 min-w-[160px]">
-                  <p className="font-semibold text-sm text-foreground mb-1.5">{tooltip.region.name}</p>
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    <div className="flex justify-between gap-4">
-                      <span>Stores</span>
-                      <span className="font-medium text-foreground">{tooltip.region.storeCount}</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span>Active UMKM</span>
-                      <span className="font-medium text-foreground">{tooltip.region.activeUMKM}</span>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <span>Promotion</span>
-                      <span className="font-medium text-foreground">{tooltip.region.promotionInstalled}/{tooltip.region.promotionTotal}</span>
-                    </div>
-                  </div>
-                  <div className="mt-2 pt-2 border-t border-border">
-                    <ExpansionBadge status={tooltip.region.expansionStatus} />
-                  </div>
-                </div>
-              </motion.div>
+              <TooltipCard tooltip={tooltip} />
             )}
           </AnimatePresence>
         </div>
@@ -204,7 +160,7 @@ export function SulawesiMap({ regions }: SulawesiMapProps) {
                       <h3 className="font-semibold text-sm">{selected.name}</h3>
                       <ExpansionBadge status={selected.expansionStatus} />
                     </div>
-                    <p className="text-xs text-muted-foreground">Kabupaten/Kota — Sulawesi Tengah</p>
+                    <p className="text-xs text-muted-foreground">Kabupaten/Kota — Sulawesi</p>
                   </div>
                   <button
                     onClick={() => setSelected(null)}
@@ -232,5 +188,50 @@ export function SulawesiMap({ regions }: SulawesiMapProps) {
         </AnimatePresence>
       </CardContent>
     </Card>
+  );
+}
+
+// Bounding box roughly matching projection center [121, -1.5] scale 2400 on 800×500 viewBox.
+// Empirically derived so tooltip anchors near markers.
+const BBOX = { minLng: 117.5, maxLng: 125, minLat: -4, maxLat: 2 };
+
+function TooltipCard({ tooltip }: { tooltip: TooltipState }) {
+  const leftPct = ((tooltip.cx - BBOX.minLng) / (BBOX.maxLng - BBOX.minLng)) * 100;
+  const topPct = ((BBOX.maxLat - tooltip.cy) / (BBOX.maxLat - BBOX.minLat)) * 100;
+  return (
+    <motion.div
+      key="tooltip"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.12 }}
+      className="absolute z-10 pointer-events-none"
+      style={{
+        left: `${leftPct}%`,
+        top: `${topPct}%`,
+        transform: "translate(-50%, -130%)",
+      }}
+    >
+      <div className="bg-white border border-border rounded-xl shadow-lg p-3 min-w-[160px]">
+        <p className="font-semibold text-sm text-foreground mb-1.5">{tooltip.region.name}</p>
+        <div className="space-y-1 text-xs text-muted-foreground">
+          <div className="flex justify-between gap-4">
+            <span>Stores</span>
+            <span className="font-medium text-foreground">{tooltip.region.storeCount}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span>Active UMKM</span>
+            <span className="font-medium text-foreground">{tooltip.region.activeUMKM}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span>Promotion</span>
+            <span className="font-medium text-foreground">{tooltip.region.promotionInstalled}/{tooltip.region.promotionTotal}</span>
+          </div>
+        </div>
+        <div className="mt-2 pt-2 border-t border-border">
+          <ExpansionBadge status={tooltip.region.expansionStatus} />
+        </div>
+      </div>
+    </motion.div>
   );
 }
