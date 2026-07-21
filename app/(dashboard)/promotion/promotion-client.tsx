@@ -1,18 +1,20 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useTransition } from "react";
 import type { Store } from "@/db/schema";
 import type { AreaStat } from "@/data/area-stats";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { TablePagination } from "@/components/ui/table-pagination";
-import { Search } from "lucide-react";
+import { Search, ArrowLeftRight } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { togglePromosiAction } from "@/lib/actions/area";
 
 const PAGE_SIZE = 25;
 
@@ -48,6 +50,18 @@ export function PromotionClient({ stores, areaStats }: Props) {
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const [pending, startTransition] = useTransition();
+  const [busyId, setBusyId] = useState<number | null>(null);
+
+  const toggle = (id: number, current: "Terpasang" | "Belum") => {
+    const next = current === "Terpasang" ? "Belum" : "Terpasang";
+    setBusyId(id);
+    startTransition(async () => {
+      await togglePromosiAction(id, next);
+      setBusyId(null);
+    });
+  };
 
   const totalTerpasang = stores.filter((s) => s.saranaPromosi === "Terpasang").length;
   const totalBelum = stores.filter((s) => s.saranaPromosi === "Belum").length;
@@ -142,6 +156,7 @@ export function PromotionClient({ stores, areaStats }: Props) {
               <TableHead className="hidden xl:table-cell">AM</TableHead>
               <TableHead className="text-center">UMKM</TableHead>
               <TableHead className="text-center">Sarana Promosi</TableHead>
+              <TableHead className="w-20" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -175,6 +190,19 @@ export function PromotionClient({ stores, areaStats }: Props) {
                   >
                     {s.saranaPromosi}
                   </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 gap-1 text-[10px] text-muted-foreground hover:text-foreground"
+                    disabled={pending && busyId === s.id}
+                    onClick={() => toggle(s.id, s.saranaPromosi)}
+                    title={`Ubah ke ${s.saranaPromosi === "Terpasang" ? "Belum" : "Terpasang"}`}
+                  >
+                    <ArrowLeftRight className="w-3 h-3" />
+                    Ubah
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

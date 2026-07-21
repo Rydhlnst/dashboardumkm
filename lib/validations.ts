@@ -24,5 +24,15 @@ export const UMKMProductSchema = z.object({
   keterangan: z.enum(["AKTIF", "UMKM POLITIS", "TIDAK AKTIF"]),
 });
 
+export const AreaSettingSchema = z.object({
+  expansionStatus: z.enum(["open", "conditional", "closed"]),
+  pksStatus: z.enum(["available", "not_available"]),
+  timelineStatus: z.enum(["planned", "in_progress", "completed"]),
+  targetDate: z.string().max(30).default(""),
+  newStores: z.array(z.string()).default([]),
+  notes: z.string().default(""),
+});
+
 export type StoreInput = z.infer<typeof StoreSchema>;
 export type UMKMProductInput = z.infer<typeof UMKMProductSchema>;
+export type AreaSettingInput = z.infer<typeof AreaSettingSchema>;

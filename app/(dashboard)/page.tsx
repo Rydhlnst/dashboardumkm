@@ -11,10 +11,14 @@ import { SocializationTable } from "@/components/dashboard/socialization-table";
 import { InsightCards } from "@/components/dashboard/insight-cards";
 import { MonthlyTrendChart } from "@/components/dashboard/monthly-trend-chart";
 import { buildDashboardData } from "@/data/dashboard";
-import { getAreaStats, getKPISummary } from "@/db/queries";
+import { getAreaStats, getKPISummary, getAreaSettings } from "@/db/queries";
 
 export default async function DashboardPage() {
-  const [areaStats, kpiSummary] = await Promise.all([getAreaStats(), getKPISummary()]);
+  const [areaStats, kpiSummary, areaSettings] = await Promise.all([
+    getAreaStats(),
+    getKPISummary(),
+    getAreaSettings(),
+  ]);
 
   const {
     regions,
@@ -25,7 +29,7 @@ export default async function DashboardPage() {
     expansionTimeline,
     socializationData,
     monthlyTrendData,
-  } = buildDashboardData(areaStats, kpiSummary);
+  } = buildDashboardData(areaStats, kpiSummary, areaSettings);
 
   return (
     <div className="space-y-6">

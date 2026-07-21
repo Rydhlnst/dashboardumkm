@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, varchar, text } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, varchar, text, json } from "drizzle-orm/pg-core";
 
 export const stores = pgTable("stores", {
   id: serial("id").primaryKey(),
@@ -28,5 +28,26 @@ export const umkmProducts = pgTable("umkm_products", {
   keterangan: varchar("keterangan", { length: 50 }).notNull().$type<"AKTIF" | "UMKM POLITIS" | "TIDAK AKTIF">(),
 });
 
+export const areaSettings = pgTable("area_settings", {
+  id: serial("id").primaryKey(),
+  area: varchar("area", { length: 100 }).notNull().unique(),
+  expansionStatus: varchar("expansion_status", { length: 20 })
+    .notNull()
+    .$type<"open" | "conditional" | "closed">()
+    .default("closed"),
+  pksStatus: varchar("pks_status", { length: 20 })
+    .notNull()
+    .$type<"available" | "not_available">()
+    .default("not_available"),
+  timelineStatus: varchar("timeline_status", { length: 20 })
+    .notNull()
+    .$type<"planned" | "in_progress" | "completed">()
+    .default("planned"),
+  targetDate: varchar("target_date", { length: 30 }).notNull().default(""),
+  newStores: json("new_stores").$type<string[]>().notNull().default([]),
+  notes: text("notes").notNull().default(""),
+});
+
 export type Store = typeof stores.$inferSelect;
 export type UMKMProduct = typeof umkmProducts.$inferSelect;
+export type AreaSetting = typeof areaSettings.$inferSelect;

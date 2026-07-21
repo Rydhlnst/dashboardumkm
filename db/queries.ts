@@ -1,7 +1,11 @@
 import { db } from "./index";
-import { stores, umkmProducts } from "./schema";
+import { stores, umkmProducts, areaSettings } from "./schema";
 import { eq, sql, count, max } from "drizzle-orm";
-import type { StoreInput, UMKMProductInput } from "@/lib/validations";
+import type {
+  StoreInput,
+  UMKMProductInput,
+  AreaSettingInput,
+} from "@/lib/validations";
 
 export async function getStores() {
   return db.select().from(stores).orderBy(stores.no);
@@ -104,4 +108,44 @@ export async function updateUMKMProduct(id: number, data: UMKMProductInput) {
 
 export async function deleteUMKMProduct(id: number) {
   await db.delete(umkmProducts).where(eq(umkmProducts.id, id));
+}
+
+export async function getAreaSettings() {
+  return db.select().from(areaSettings).orderBy(areaSettings.area);
+}
+
+export async function updateAreaSetting(area: string, data: AreaSettingInput) {
+  const [row] = await db
+    .update(areaSettings)
+    .set(data)
+    .where(eq(areaSettings.area, area))
+    .returning();
+  return row;
+}
+
+export async function upsertAreaSetting(area: string, data: AreaSettingInput) {
+  const existing = await db
+    .select()
+    .from(areaSettings)
+    .where(eq(areaSettings.area, area));
+  if (existing.length) {
+    return updateAreaSetting(area, data);
+  }
+  const [row] = await db
+    .insert(areaSettings)
+    .values({ area, ...data })
+    .returning();
+  return row;
+}
+
+export async function updateStorePromosi(
+  id: number,
+  status: "Terpasang" | "Belum"
+) {
+  const [row] = await db
+    .update(stores)
+    .set({ saranaPromosi: status })
+    .where(eq(stores.id, id))
+    .returning();
+  return row;
 }

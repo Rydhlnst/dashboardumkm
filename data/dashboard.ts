@@ -5,9 +5,21 @@ import type {
   InsightCard,
   TimelineEntry,
   SocializationRow,
+  ExpansionStatus,
+  PKSStatus,
 } from "@/types";
 import type { AreaStat } from "./area-stats";
 import { areaStats, kpiSummary } from "./area-stats";
+import type { AreaSetting } from "@/db/schema";
+
+type AreaSettingLike = {
+  area: string;
+  expansionStatus: ExpansionStatus;
+  pksStatus: PKSStatus;
+  timelineStatus: "planned" | "in_progress" | "completed";
+  targetDate: string;
+  newStores: string[];
+};
 
 type KPISummary = {
   totalAreas: number;
@@ -106,17 +118,20 @@ const AREA_CFG: Record<string, {
   },
 };
 
-// Build regions from real data, merging static config for non-derivable fields
-export function buildRegions(stats: AreaStat[]): Region[] {
+// Build regions from real data, merging DB area_settings (fallback: static AREA_CFG defaults).
+export function buildRegions(
+  stats: AreaStat[],
+  settings: AreaSettingLike[] = []
+): Region[] {
+  const settingByArea = new Map(settings.map((s) => [s.area, s]));
   const result: Region[] = [];
   for (const stat of stats) {
     const cfg = AREA_CFG[stat.area];
     if (!cfg) continue;
-    const umkmPct = stat.umkmCoverage;
-    const expansionStatus =
-      umkmPct >= 70 ? ("open" as const)
-      : umkmPct >= 30 ? ("conditional" as const)
-      : ("closed" as const);
+    const setting = settingByArea.get(stat.area);
+    const expansionStatus: ExpansionStatus = setting?.expansionStatus ?? "closed";
+    const pksStatus: PKSStatus = setting?.pksStatus ?? cfg.pksStatus;
+    const newStores = setting?.newStores?.length ? setting.newStores : cfg.newStores;
     result.push({
       id: cfg.id,
       name: cfg.name,
@@ -126,17 +141,38 @@ export function buildRegions(stats: AreaStat[]): Region[] {
       promotionInstalled: stat.saranaPromosi,
       promotionTotal: stat.totalStores,
       expansionStatus,
-      pksStatus: cfg.pksStatus,
+      pksStatus,
       coordinates: cfg.coordinates,
       trend: cfg.trend,
       trendValue: cfg.trendValue,
       participants: cfg.participants,
       mdProgress: cfg.mdProgress,
       activeItems: cfg.activeItems,
-      newStores: cfg.newStores,
+      newStores,
     });
   }
   return result;
+}
+
+export function buildTimeline(
+  stats: AreaStat[],
+  settings: AreaSettingLike[]
+): TimelineEntry[] {
+  const settingByArea = new Map(settings.map((s) => [s.area, s]));
+  return stats
+    .map((stat) => {
+      const cfg = AREA_CFG[stat.area];
+      const setting = settingByArea.get(stat.area);
+      if (!cfg || !setting) return null;
+      return {
+        regionId: cfg.id,
+        regionName: cfg.name,
+        newStores: setting.newStores?.length ? setting.newStores : cfg.newStores,
+        targetDate: setting.targetDate || "—",
+        status: setting.timelineStatus,
+      } as TimelineEntry;
+    })
+    .filter((x): x is TimelineEntry => x !== null);
 }
 
 export const regions: Region[] = buildRegions(areaStats);
@@ -277,8 +313,13 @@ export const monthlyTrendData = [
 ];
 
 // Builder for dashboard home when DB data is available
-export function buildDashboardData(stats: AreaStat[], kpi: KPISummary) {
-  const builtRegions = buildRegions(stats);
+export function buildDashboardData(
+  stats: AreaStat[],
+  kpi: KPISummary,
+  settings: AreaSettingLike[] = []
+) {
+  const builtRegions = buildRegions(stats, settings);
+  const builtTimeline = settings.length ? buildTimeline(stats, settings) : expansionTimeline;
 
   const builtStoreDistribution: StoreDistribution[] = [...builtRegions]
     .sort((a, b) => b.storeCount - a.storeCount)
@@ -369,6 +410,8 @@ export function buildDashboardData(stats: AreaStat[], kpi: KPISummary) {
     insightCards: builtInsightCards,
     socializationData: builtSocializationData,
     monthlyTrendData: builtMonthlyTrendData,
-    expansionTimeline,
+    expansionTimeline: builtTimeline,
   };
 }
+
+export type { AreaSetting };
